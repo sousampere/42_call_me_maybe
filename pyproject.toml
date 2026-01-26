@@ -1,0 +1,7 @@
+[project]
+name = "42-call-me-maybe"
+version = "0.1.0"
+description = "gtourdia's call_me_maybe project (school 42)"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
