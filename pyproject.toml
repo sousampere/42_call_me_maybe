@@ -4,4 +4,8 @@ version = "0.1.0"
 description = "gtourdia's call_me_maybe project (school 42)"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "pydantic>=2.12.5",
+    "torch>=2.10.0",
+    "transformers>=5.0.0",
+]

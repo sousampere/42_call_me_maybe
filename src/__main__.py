@@ -1,26 +1,17 @@
 #!/usr/bin/python3
 
+
 try:
     import argparse
-    from src.misc import printerr
+    from src.misc import printerr, load_json
+    from src import Small_LLM_Model
+    from .llm_utils import translate_token_from_int, tensor_to_list, generate_next_word
     import json
-    from ..llm_sdk import Small_LLM_Model
+    import math
 except Exception as e:
     print(f"Could not import a module: {e}")
     print('Have you tried installing the env with "make install"?')
     exit(1)
-
-
-def load_json(json_file_path: str) -> list:
-    """ Loads the given json file as a list object """
-    try:
-        with open(json_file_path, 'r') as input_file:
-            loaded_json = json.load(input_file)
-    except FileNotFoundError as e:
-        raise FileNotFoundError(f'Your input file was not found. {e}')
-    except Exception as e:
-        raise Exception(e)
-    return loaded_json
 
 
 def get_parsed_args() -> dict[str, str]:
@@ -63,6 +54,13 @@ def main() -> None:
         print(prompt)
 
     # ? ===== Calling LLM ======
+    llm = Small_LLM_Model(device='mps')
+    output = '{'
+    while True:
+        word = generate_next_word(output, llm)
+        output = output + word
+        print(f'\n\n{output}\n\n')
+    
 
     return None
 
