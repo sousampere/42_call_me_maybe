@@ -158,6 +158,7 @@ def main() -> None:
             if function_data['args_types'][arg] == 'str':
                 print(f"{arg} is a str")
                 value = generate_str(instructions, llm)
+                value = value.replace('Ġ', ' ').replace('Ċ', '')
                 llm_result['args'][arg] = value
                 instructions += str(value) + '\n'
         print(llm_result)

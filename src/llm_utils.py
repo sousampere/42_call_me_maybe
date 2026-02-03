@@ -2,13 +2,13 @@
 try:
     import json
     from src.misc import printerr
-    from llm_sdk import Small_LLM_Model
+    from llm_sdk import Small_LLM_Model, torch
     import math
 except Exception as e:
     print('Import error:', e)
 
 
-def tensor_to_list(input: Tensor) -> list[int]:
+def tensor_to_list(input: torch.Tensor) -> list[int]:
     """ Transforms a list of tensors into a python list """
     try:
         return input.tolist()[0]

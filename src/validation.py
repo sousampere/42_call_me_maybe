@@ -51,6 +51,7 @@ def check_generated(output: str) -> bool:
     return True
 
 def generate_int(instructions: str, llm: Small_LLM_Model) -> int:
+    """ Generates an int from the given instrucitons """
     output = ''
     encoded_text = llm._encode(instructions + output)
     encoded_text = tensor_to_list(encoded_text)
@@ -86,6 +87,7 @@ def generate_int(instructions: str, llm: Small_LLM_Model) -> int:
 
 
 def generate_float(instructions: str, llm: Small_LLM_Model) -> float:
+    """ Generates a float from the given instrucitons """
     output = ''
     encoded_text = llm._encode(instructions + output)
     encoded_text = tensor_to_list(encoded_text)
