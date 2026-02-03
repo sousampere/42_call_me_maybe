@@ -6,7 +6,7 @@ try:
     from src.misc import printerr, load_json, printblue
     from llm_sdk import Small_LLM_Model
     from .llm_utils import translate_token_from_int, tensor_to_list, generate_next_word, get_highest_str_token_from_logits, set_null_highest_token
-    from .validation import check_generated, get_available_functions, get_function_data, generate_int
+    from .validation import check_generated, get_available_functions, get_function_data, generate_int, generate_float, generate_bool, generate_str
     import json
     import math
 except Exception as e:
@@ -61,7 +61,7 @@ def main() -> None:
     print(avaiable_functions)
 
     # ? ===== Prompt ======
-    user_prompt = 'What is the sum of 2 and 3 ?'
+    user_prompt = 'Substitute the string "Hello world", by replacing "Hello" by "Goodbye".'
     instructions = '''<|im_start|>system
 {"available_functions": ''' + str(avaiable_functions) + ''',\
 "goal": "Select the correct function to execute the user's prompt"}<|im_end|>
@@ -92,6 +92,14 @@ def main() -> None:
     # ? ===== Generate valid token, one by one ======
     while (output not in avaiable_functions):
         print(output)
+
+        ft_list = []
+        for function in avaiable_functions:
+            if function.startswith(output):
+                ft_list.append(function)
+        if len(ft_list) == 1:
+            output = ft_list[0]
+            break
         try:
             # Getting highest token
             current_token = get_highest_str_token_from_logits(logits, wordlist)
@@ -119,96 +127,38 @@ def main() -> None:
     # ? ===== Getting function args ======
     function_data = get_function_data(output)
     instructions = '''<|im_start|>system
-{"goal": "Select the arguments for the following function, according to the user's prompt, followed by an end token."},\
-''' + str(function_data) + '''<|im_end|>
+{"goal": "Select the arguments for the following function, according to the user's prompt, followed by a \n character."},\
+''' + str(function_data) + '''
+{"particularity": "For negative numbers, include a - character at the start"}<|im_end|>
 <|im_start|>user
 ''' + user_prompt + '''<|im_end|>
 <|im_start|>assistant
 '''
-    generate_int(instructions, llm)
-    exit()
+    # exit()
     for arg in function_data['args_names']:
-        output = f'{arg}='
-        printblue(instructions + output)
-        # ? ===== Tokenization ======
-        # Encoding the tokens
-        encoded_text = llm._encode(instructions + output)
-        print(encoded_text)
-        encoded_text = tensor_to_list(encoded_text)
-        print(encoded_text)
-
-        # ? ===== Calculating logits ======
-        logits = llm.get_logits_from_input_ids(encoded_text)
-        wordlist = llm.get_path_to_vocabulary_json()
-        current_token = get_highest_str_token_from_logits(logits, wordlist)
-        print(current_token)
-        generated_tokens = ''
-
-        for arg in function_data['args_names']:
-            current_token = get_highest_str_token_from_logits(logits, wordlist)
-            # * Checks if the generated token is the END token
-            if logits.index(max(logits)) == 151645:
-                # ? Filtering for float
-                if function_data['args_types'][arg] == 'float':
-                    try:
-                        # Filtering characters
-                        final_string = ''
-                        if generated_tokens[0] == '-':
-                            final_string = final_string + '-'
-                        for character in generated_tokens:
-                            if character in '1234567890.':
-                                final_string = final_string + character
-                            if character == ',':
-                                final_string = final_string + '.'
-                        llm_result['args'][arg] = float(final_string)
-                    except Exception as e:
-                        raise ValueError(f'Could not convert "{final_string}" to float: {e}')
-                # ? Filtering for int
-                if function_data['args_types'][arg] == 'int':
-                    try:
-                        # Filtering characters
-                        final_string = ''
-                        if generated_tokens[0] == '-':
-                            final_string = final_string + '-'
-                        for character in generated_tokens:
-                            if character in '1234567890':
-                                final_string = final_string + character
-                        llm_result['args'][arg] = int(final_string)
-                    except Exception as e:
-                        raise ValueError(f'Could not convert "{final_string}" to int: {e}')
-                # ? Filtering for str
-                if function_data['args_types'][arg] == 'str':
-                    llm_result['args'][arg] = generated_tokens
-                # ? Filtering for bool
-                if function_data['args_types'][arg] == 'bool':
-                    try:
-                        # Filtering characters
-                        final_string = ''
-                        if generated_tokens[0] == '-':
-                            final_string = final_string + '-'
-                        for character in generated_tokens:
-                            if character in '1234567890':
-                                final_string = final_string + character
-                        llm_result['args'][arg] = int(final_string)
-                    except Exception as e:
-                        raise ValueError(f'Could not convert "{final_string}" to int: {e}')
-                    
-
-
-
-        while ('<|im_end|>' not in output and 'Ċ' not in output):
-            # Getting highest token
-            current_token = get_highest_str_token_from_logits(logits, wordlist)
-            print(output+current_token)
-            output = output + current_token
-            generated_tokens = generated_tokens + current_token
-            encoded_text = llm._encode(instructions + output)
-            encoded_text = tensor_to_list(encoded_text)
-            logits = llm.get_logits_from_input_ids(encoded_text)
-            current_token = get_highest_str_token_from_logits(logits, wordlist)
-            if (function_data['args_types'][arg] == 'float'):
-                print(float(generated_tokens.replace('Ċ', '')))
-
+        print(arg)
+        instructions = instructions + f'{arg}='
+        if function_data['args_types'][arg] == 'int':
+            print(f"{arg} is an int")
+            value = generate_int(instructions, llm)
+            llm_result['args'][arg] = value
+            instructions += str(value) + '\n'
+        if function_data['args_types'][arg] == 'float':
+            print(f"{arg} is a float")
+            value = generate_float(instructions, llm)
+            llm_result['args'][arg] = value
+            instructions += str(value) + '\n'
+        if function_data['args_types'][arg] == 'bool':
+            print(f"{arg} is a bool")
+            value = generate_bool(instructions, llm)
+            llm_result['args'][arg] = value
+            instructions += str(value) + '\n'
+        if function_data['args_types'][arg] == 'str':
+            print(f"{arg} is a str")
+            value = generate_str(instructions, llm)
+            llm_result['args'][arg] = value
+            instructions += str(value) + '\n'
+    print(llm_result)
     return None
 
 

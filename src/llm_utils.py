@@ -31,7 +31,11 @@ def get_highest_str_token_from_logits(logits: list[float], wordlist_path: str) -
     # Gets the highest token's index from the logits
     highest_token_index = logits.index(max(logits))
     # Translates the token's index to its corresponding string value
-    print(f"HIGHEST TOKEN: {highest_token_index}")
+    # print(f"HIGHEST TOKEN: {highest_token_index}")
+    # while highest_token_index >= 151644:
+    #     logits = set_null_highest_token(logits)
+    #     highest_token_index = logits.index(max(logits))
+    #     # print(f"NEW HIGHEST TOKEN: {highest_token_index}")
     highest_token_str = translate_token_from_int(wordlist_path, highest_token_index)
     # Returning the string token
     return (highest_token_str)
