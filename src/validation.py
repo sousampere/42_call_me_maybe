@@ -3,7 +3,7 @@
 try:
     from typing import Any
     from llm_sdk import Small_LLM_Model
-    from src.misc import load_json, printblue
+    from src.misc import load_json, printblue, printgreen
     from .llm_utils import tensor_to_list, \
         get_highest_str_token_from_logits, \
         set_null_highest_token
@@ -222,3 +222,39 @@ def generate_function(available_functions: list[str],
             print(e)
             logits = set_null_highest_token(logits)
     return output
+
+
+def generate_args(args: dict, function_data: dict,
+                  instructions: str, llm: Small_LLM_Model) -> dict:
+    if args['verbose']:
+        print('')
+        print(f'Args to get: {function_data['args_names']}')
+
+    llm_args: dict = {'args': {}}
+
+    for arg in function_data['args_names']:
+        if args['verbose']:
+            print('')
+            print(f'Getting arg "{arg}"...')
+        instructions = instructions + f'{arg}='
+        if function_data['args_types'][arg] == 'int':
+            value_int = generate_int(instructions, llm)
+            llm_args['args'][arg] = value_int
+            instructions += str(value_int) + '\n'
+        if function_data['args_types'][arg] == 'float':
+            value_float = generate_float(instructions, llm)
+            llm_args['args'][arg] = value_float
+            instructions += str(value_float) + '\n'
+        if function_data['args_types'][arg] == 'bool':
+            value_bool = generate_bool(instructions, llm)
+            llm_args['args'][arg] = value_bool
+            instructions += str(value_bool) + '\n'
+        if function_data['args_types'][arg] == 'str':
+            value = generate_str(instructions, llm)
+            value = value.replace('Ġ', ' ').replace('Ċ', '')
+            llm_args['args'][arg] = value
+            instructions += str(value) + '\n'
+            if args['verbose']:
+                printgreen(f'🎯 Found arg {arg} -> '
+                           f'{llm_args['args'][arg]}')
+    return llm_args

@@ -7,9 +7,7 @@ try:
         printgreen, printyellow
     from llm_sdk import Small_LLM_Model
     from .validation import get_function_data, \
-        generate_int, generate_float, \
-        generate_bool, generate_str, \
-        generate_function
+        generate_function, generate_args
     import json
     import os
 except Exception as e:
@@ -127,35 +125,8 @@ according to the user's prompt, followed by a \n character."},\
 ''' + user_prompt + '''<|im_end|>
 <|im_start|>assistant
 '''
-        if args['verbose']:
-            print('')
-            print(f'Args to get: {function_data['args_names']}')
-
-        for arg in function_data['args_names']:
-            if args['verbose']:
-                print('')
-                print(f'Getting arg "{arg}"...')
-            instructions = instructions + f'{arg}='
-            if function_data['args_types'][arg] == 'int':
-                value_int = generate_int(instructions, llm)
-                llm_result['args'][arg] = value_int
-                instructions += str(value_int) + '\n'
-            if function_data['args_types'][arg] == 'float':
-                value_float = generate_float(instructions, llm)
-                llm_result['args'][arg] = value_float
-                instructions += str(value_float) + '\n'
-            if function_data['args_types'][arg] == 'bool':
-                value_bool = generate_bool(instructions, llm)
-                llm_result['args'][arg] = value_bool
-                instructions += str(value_bool) + '\n'
-            if function_data['args_types'][arg] == 'str':
-                value = generate_str(instructions, llm)
-                value = value.replace('Ġ', ' ').replace('Ċ', '')
-                llm_result['args'][arg] = value
-                instructions += str(value) + '\n'
-                if args['verbose']:
-                    printgreen(f'🎯 Found arg {arg} -> '
-                               f'{llm_result['args'][arg]}')
+        llm_result['args'] = generate_args(args, function_data,
+                                           instructions, llm)
         final_json.append(llm_result)
         if args['verbose']:
             printyellow(f'Json for this prompt:\n{llm_result}')
