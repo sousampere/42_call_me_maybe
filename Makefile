@@ -63,6 +63,26 @@ flake8:
 	uv run python3.14 -m flake8 ./src
 
 mypy:
-	uv run python3.14 -m mypy ./src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	uv run python3.14 -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+
+mypy-strict:
+	uv run python3.14 -m mypy . --strict
 
 lint: flake8 mypy
+
+lint-strict: flake8 mypy-strict
+
+debug:
+	python -m pdb -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT)
+
+debug-verbose:
+	python -m pdb -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT) --verbose=true
+
+clean:
+	rm -rf data/output
+	rm -rf .venv
+	rm -rf .mypy_cache
+	rm -rf llm
+	rm -rf __pycache__
+
+re: clean install

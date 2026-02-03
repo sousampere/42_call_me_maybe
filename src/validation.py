@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
+
 try:
     from typing import Any
     from llm_sdk import Small_LLM_Model
-    from src.misc import load_json, printblue, printgreen
+    from src.misc import load_json, printblue, printgreen, printyellow
     from .llm_utils import tensor_to_list, \
         get_highest_str_token_from_logits, \
         set_null_highest_token
@@ -151,7 +152,7 @@ def generate_str(instructions: str, llm: Small_LLM_Model) -> str:
     # print(wordlist)
     # printblue(instructions + output)
     current_token = get_highest_str_token_from_logits(logits, wordlist)
-    while current_token != 'Ċ':
+    while current_token != 'Ċ' and len(output) < 1000:
         # print(output)
         # Validating generated token for an int
         current_token = get_highest_str_token_from_logits(logits, wordlist)
@@ -174,7 +175,8 @@ def generate_function(available_functions: list[str],
                       instructions: str,
                       prompt: str,
                       llm: Small_LLM_Model,
-                      args: dict) -> str:
+                      args: dict[str, str]) -> str:
+    """Generate a function from the given prompt using the llm"""
     output = 'fn_'
     if args['verbose']:
         printblue('==================================================\n\n')
@@ -224,37 +226,44 @@ def generate_function(available_functions: list[str],
     return output
 
 
-def generate_args(args: dict, function_data: dict,
-                  instructions: str, llm: Small_LLM_Model) -> dict:
+def generate_args(args: dict[str, str], function_data: dict[str, Any],
+                  instructions: str, llm: Small_LLM_Model) -> dict[str, Any]:
+    """Generate arguments for the given function using the llm"""
     if args['verbose']:
         print('')
         print(f'Args to get: {function_data['args_names']}')
 
-    llm_args: dict = {'args': {}}
+    # Initializing the dict containing the args to return
+    llm_args: dict[str, Any] = {'args': {}}
 
     for arg in function_data['args_names']:
         if args['verbose']:
             print('')
-            print(f'Getting arg "{arg}"...')
+            printyellow(f'Getting arg "{arg}"...')
         instructions = instructions + f'{arg}='
+        # Dispatch the generation to the correct generator
         if function_data['args_types'][arg] == 'int':
+            # ? > For integers
             value_int = generate_int(instructions, llm)
             llm_args['args'][arg] = value_int
             instructions += str(value_int) + '\n'
         if function_data['args_types'][arg] == 'float':
+            # ? > For floats
             value_float = generate_float(instructions, llm)
             llm_args['args'][arg] = value_float
             instructions += str(value_float) + '\n'
         if function_data['args_types'][arg] == 'bool':
+            # ? > For bools
             value_bool = generate_bool(instructions, llm)
             llm_args['args'][arg] = value_bool
             instructions += str(value_bool) + '\n'
         if function_data['args_types'][arg] == 'str':
+            # ? > For strings
             value = generate_str(instructions, llm)
             value = value.replace('Ġ', ' ').replace('Ċ', '')
             llm_args['args'][arg] = value
             instructions += str(value) + '\n'
-            if args['verbose']:
-                printgreen(f'🎯 Found arg {arg} -> '
-                           f'{llm_args['args'][arg]}')
+        if args['verbose']:
+            printgreen(f'🎯 Found arg {arg} -> '
+                       f'{llm_args['args'][arg]}')
     return llm_args

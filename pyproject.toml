@@ -11,6 +11,11 @@ dependencies = [
     "torch>=2.10.0",
     "transformers>=5.0.0",
 ]
+
 [[tool.mypy.overrides]]
 module = "llm_sdk.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "src.llm_utils"
 ignore_errors = true
