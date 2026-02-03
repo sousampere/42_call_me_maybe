@@ -2,7 +2,8 @@
 try:
     import json
     from src.misc import printerr
-    from src import Small_LLM_Model
+    from llm_sdk import Small_LLM_Model
+    import math
 except Exception as e:
     print('Import error:', e)
 
@@ -22,7 +23,25 @@ def translate_token_from_int(wordlist_path: str, token: int):
         for current_token in wordlist:
             if wordlist[current_token] == token:
                 return current_token
-        raise ValueError(f'The given token ({token}) was not found')
+        # raise ValueError(f'The given token ({token}) was not found')
+
+
+def get_highest_str_token_from_logits(logits: list[float], wordlist_path: str) -> str:
+    """ Returns the str highest token from the logits """
+    # Gets the highest token's index from the logits
+    highest_token_index = logits.index(max(logits))
+    # Translates the token's index to its corresponding string value
+    print(f"HIGHEST TOKEN: {highest_token_index}")
+    highest_token_str = translate_token_from_int(wordlist_path, highest_token_index)
+    # Returning the string token
+    return (highest_token_str)
+
+
+def set_null_highest_token(logits: list[float]) -> str:
+    """ Returns logits with the highest token neutralized """
+    logits[logits.index(max(logits))] = -math.inf
+    # Returning the new logits
+    return (logits)
 
 
 def generate_next_word(last_output: str, llm: Small_LLM_Model) -> str:

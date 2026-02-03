@@ -12,6 +12,13 @@ def printerr(*args) -> None:
     sys.stderr.write(f'{Colors.END}\n')
 
 
+def printblue(*args) -> None:
+    """ Print a red message """
+    sys.stdout.write(f"{Colors.BLUE}")
+    sys.stdout.write(*args)
+    sys.stdout.write(f'{Colors.END}\n')
+
+
 def load_json(json_file_path: str) -> list:
     """ Loads the given json file as a list object """
     try:
