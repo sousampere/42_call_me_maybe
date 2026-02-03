@@ -56,10 +56,13 @@ install:
 run:
 	uv run python3.14 -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT)
 
+run-verbose:
+	uv run python3.14 -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT) --verbose=true
+
 flake8:
 	uv run python3.14 -m flake8 ./src
 
 mypy:
-	uv run python3.14 -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	uv run python3.14 -m mypy ./src --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
 lint: flake8 mypy

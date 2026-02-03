@@ -1,61 +1,52 @@
 #!/usr/bin/python3
+
+
 try:
     import json
     from src.misc import printerr
-    from llm_sdk import Small_LLM_Model, torch
+    from llm_sdk import torch
     import math
+    from typing import Any
 except Exception as e:
     print('Import error:', e)
 
 
-def tensor_to_list(input: torch.Tensor) -> list[int]:
-    """ Transforms a list of tensors into a python list """
+def tensor_to_list(input: torch.Tensor) -> Any:
+    """Transforms a list of tensors into a python list"""
     try:
         return input.tolist()[0]
     except Exception as e:
         printerr(f'Tensor conversion error: {e}')
-        exit(1)
 
 
-def translate_token_from_int(wordlist_path: str, token: int):
+def translate_token_from_int(wordlist_path: str, token: int) -> str:
+    """Returns the corresponding string value for the given token"""
+    # Opens the wordlist and loads it as a python object
     with open(wordlist_path, 'r') as wordlist_file:
         wordlist = json.load(wordlist_file)
+        # Scan each token for the one we want
         for current_token in wordlist:
             if wordlist[current_token] == token:
-                return current_token
-        # raise ValueError(f'The given token ({token}) was not found')
+                # Token found, returning its string value
+                return str(current_token)
+    raise ValueError(f'The given token ({token}) was not found')
 
 
-def get_highest_str_token_from_logits(logits: list[float], wordlist_path: str) -> str:
-    """ Returns the str highest token from the logits """
+def get_highest_str_token_from_logits(logits: list[float],
+                                      wordlist_path: str) -> str:
+    """Returns the (str) highest token from the given logits"""
     # Gets the highest token's index from the logits
     highest_token_index = logits.index(max(logits))
     # Translates the token's index to its corresponding string value
-    # print(f"HIGHEST TOKEN: {highest_token_index}")
-    # while highest_token_index >= 151644:
-    #     logits = set_null_highest_token(logits)
-    #     highest_token_index = logits.index(max(logits))
-    #     # print(f"NEW HIGHEST TOKEN: {highest_token_index}")
-    highest_token_str = translate_token_from_int(wordlist_path, highest_token_index)
+    highest_token_str = translate_token_from_int(
+        wordlist_path,
+        highest_token_index)
     # Returning the string token
     return (highest_token_str)
 
 
-def set_null_highest_token(logits: list[float]) -> str:
-    """ Returns logits with the highest token neutralized """
+def set_null_highest_token(logits: list[float]) -> list[float]:
+    """Returns logits with the highest token neutralized"""
     logits[logits.index(max(logits))] = -math.inf
     # Returning the new logits
     return (logits)
-
-
-def generate_next_word(last_output: str, llm: Small_LLM_Model) -> str:
-    #* Encoding tokens (tensor([[4913,  606,  788,  330,   32]], ...)
-    encoded = llm._encode(last_output)
-    #* Processing probabilities
-    probabilities = llm.get_logits_from_input_ids(tensor_to_list(encoded))
-    #* Handling highest rate token
-    generated_word = translate_token_from_int(
-        wordlist_path = llm.get_path_to_vocabulary_json(),
-        token=probabilities.index(max(probabilities)))
-    #* Returning result
-    return generated_word
