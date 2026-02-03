@@ -3,7 +3,7 @@
 try:
     from typing import Any
     from llm_sdk import Small_LLM_Model
-    from src.misc import load_json
+    from src.misc import load_json, printblue
     from .llm_utils import tensor_to_list, \
         get_highest_str_token_from_logits, \
         set_null_highest_token
@@ -167,4 +167,58 @@ def generate_str(instructions: str, llm: Small_LLM_Model) -> str:
         else:
             break
     # printblue(output)
+    return output
+
+
+def generate_function(available_functions: list[str],
+                      instructions: str,
+                      prompt: str,
+                      llm: Small_LLM_Model,
+                      args: dict) -> str:
+    output = 'fn_'
+    if args['verbose']:
+        printblue('==================================================\n\n')
+        printblue(f'Prompt => {instructions + output}')
+    # ? ===== Tokenization ======
+    # Encoding the tokens
+    encoded_text = llm._encode(instructions + output)
+    encoded_text = tensor_to_list(encoded_text)
+
+    # ? ===== Calculating logits ======
+    logits = llm.get_logits_from_input_ids(encoded_text)
+    wordlist = llm.get_path_to_vocabulary_json()
+
+    # ? ===== Generate valid token, one by one ======
+    if args['verbose']:
+        print(f'Calculating function for prompt: {prompt}')
+    while (output not in available_functions):
+        ft_list = []
+        for function in available_functions:
+            if function.startswith(output):
+                ft_list.append(function)
+        if len(ft_list) == 1:
+            output = ft_list[0]
+            break
+        try:
+            # Getting highest token
+            current_token = get_highest_str_token_from_logits(
+                logits,
+                wordlist)
+            valid_token = False
+            for function in available_functions:
+                if function.startswith(output + current_token):
+                    # Generated token is valid
+                    output = output + current_token
+                    # Recalculating new logits
+                    encoded_text = llm._encode(instructions + output)
+                    encoded_text = tensor_to_list(encoded_text)
+                    logits = llm.get_logits_from_input_ids(encoded_text)
+                    valid_token = True
+                    break
+            if not valid_token:
+                # Skipping this token
+                logits = set_null_highest_token(logits)
+        except Exception as e:
+            print(e)
+            logits = set_null_highest_token(logits)
     return output

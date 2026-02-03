@@ -3,15 +3,13 @@
 
 try:
     import argparse
-    from src.misc import printerr, load_json, printblue, \
+    from src.misc import printerr, load_json, \
         printgreen, printyellow
     from llm_sdk import Small_LLM_Model
-    from .llm_utils import tensor_to_list, \
-        get_highest_str_token_from_logits, \
-        set_null_highest_token
     from .validation import get_function_data, \
         generate_int, generate_float, \
-        generate_bool, generate_str
+        generate_bool, generate_str, \
+        generate_function
     import json
     import os
 except Exception as e:
@@ -71,7 +69,7 @@ def get_parsed_args() -> dict[str, str]:
 
 
 def main() -> None:
-    """Main program execution"""
+    """Process the prompts and create a json file containing the result"""
     # ? ===== Loading LLM ======
     llm = Small_LLM_Model(device='mps')
 
@@ -83,80 +81,40 @@ def main() -> None:
     # Final json will be the content saved in the output path
     final_json = []
     json_data_ft = load_json(args['functions_definitions'])
-    avaiable_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
+    available_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
     if (args['verbose']):
         print('===== Verbose ON ======')
-        print(f'Available functions: {avaiable_functions}')
+        print(f'Available functions: {available_functions}')
         print(f'Input path: {args['input']}')
         print(f'Output path: {args['output']}')
         print('')
 
+    # ! ===== Processing start ======
     for prompt in prompts:
-        # ? ===== Prompt ======
+        # ! ===== Generating function ======
+        # ? ===== Prompt creation ======
         user_prompt = prompt['prompt']
         instructions = '''<|im_start|>system
-{"available_functions": ''' + str(avaiable_functions) + ''',\
+{"available_functions": ''' + str(available_functions) + ''',\
 "goal": "Select the correct function to execute the user's prompt"}<|im_end|>
 <|im_start|>user
 ''' + user_prompt + '''<|im_end|>
 <|im_start|>assistant
 '''
-        output = 'fn_'
-        if args['verbose']:
-            printblue('==================================================\n\n')
-            printblue(f'Prompt => {instructions + output}')
         # ? ===== Preparing result =====
         llm_result = {
             'prompt': user_prompt
         }
 
-        # ? ===== Tokenization ======
-        # Encoding the tokens
-        encoded_text = llm._encode(instructions + output)
-        encoded_text = tensor_to_list(encoded_text)
-
-        # ? ===== Calculating logits ======
-        logits = llm.get_logits_from_input_ids(encoded_text)
-        wordlist = llm.get_path_to_vocabulary_json()
-
-        # ? ===== Generate valid token, one by one ======
-        if args['verbose']:
-            print(f'Calculating function for prompt: {prompt}')
-        while (output not in avaiable_functions):
-            ft_list = []
-            for function in avaiable_functions:
-                if function.startswith(output):
-                    ft_list.append(function)
-            if len(ft_list) == 1:
-                output = ft_list[0]
-                break
-            try:
-                # Getting highest token
-                current_token = get_highest_str_token_from_logits(
-                    logits,
-                    wordlist)
-                valid_token = False
-                for function in avaiable_functions:
-                    if function.startswith(output + current_token):
-                        # Generated token is valid
-                        output = output + current_token
-                        # Recalculating new logits
-                        encoded_text = llm._encode(instructions + output)
-                        encoded_text = tensor_to_list(encoded_text)
-                        logits = llm.get_logits_from_input_ids(encoded_text)
-                        valid_token = True
-                        break
-                if not valid_token:
-                    # Skipping this token
-                    logits = set_null_highest_token(logits)
-            except Exception as e:
-                print(e)
-                logits = set_null_highest_token(logits)
+        # ? ===== Generate function =====
+        output = generate_function(available_functions,
+                                   instructions, prompt, llm, args)
         llm_result['fn_name'] = output
         llm_result['args'] = {}
         if args['verbose']:
             printgreen(f'✅ Function found: {output}')
 
+        # ! ===== Generating arguments ======
         # ? ===== Getting function args ======
         function_data = get_function_data(output)
         instructions = '''<|im_start|>system
