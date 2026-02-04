@@ -53,19 +53,22 @@ install:
 	@echo "$(CYAN)[Installation]$(RESET) ➡️  Synchronizing uv"
 	uv sync
 
+sync:
+	uv sync
+
 run:
 	uv run python3.14 -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT)
 
 run-verbose:
 	uv run python3.14 -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT) --verbose=true
 
-flake8:
+flake8: sync
 	uv run python3.14 -m flake8 ./src
 
-mypy:
+mypy: sync
 	uv run python3.14 -m mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 
-mypy-strict:
+mypy-strict: sync
 	uv run python3.14 -m mypy . --strict
 
 lint: flake8 mypy
@@ -82,7 +85,11 @@ clean:
 	rm -rf data/output
 	rm -rf .venv
 	rm -rf .mypy_cache
-	rm -rf llm
+# 	rm -rf llm
 	rm -rf __pycache__
+	rm -rf .pytest_cache
 
 re: clean install
+
+test: sync
+	uv run python3.14 -m pytest tester/run_test.py
