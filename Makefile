@@ -68,13 +68,12 @@ lint: flake8 mypy
 
 lint-strict: flake8 mypy-strict
 
-source: sync
-	source .venv/bin/activate
-
 debug:
+	echo "debug needs to be run in the virtual env -> source .venv/bin/activate"
 	python -m pdb -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT)
 
 debug-verbose:
+	echo "debug needs to be run in the virtual env -> source .venv/bin/activate"
 	python -m pdb -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT) --verbose=true
 
 clean:
