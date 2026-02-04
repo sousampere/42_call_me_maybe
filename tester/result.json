@@ -1,0 +1,1 @@
+[{"prompt": "What is the product of 3 and 5?", "fn_name": "fn_multiply_numbers", "args": {"args": {"a": 3.0, "b": 5.0}}}]
