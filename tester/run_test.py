@@ -15,7 +15,7 @@ FILES = [
     ]
 
 @pytest.mark.parametrize("file", FILES)
-def test_file_generation(file):
+def test_file_generation(file: str) -> None:
     # Remove json file
     output = 'tester/result.json'
     if os.path.exists(output):
@@ -39,10 +39,12 @@ def test_file_generation(file):
 
     # If everything is OK, test is passed ✅
     assert result.returncode == 0 and os.path.exists(output) and data_ok
+    return None
 
-def main():
+def main() -> None:
     for file in FILES:
         test_file_generation(file)
+    return None
 
 if __name__ == '__main__':
     print('This program must be run in a folder next to the src folder.')
