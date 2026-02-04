@@ -78,11 +78,16 @@ clean:
 	rm -rf data/output
 	rm -rf .venv
 	rm -rf .mypy_cache
-# 	rm -rf llm
 	rm -rf __pycache__
 	rm -rf .pytest_cache
+	rm -rf .llm
+	rm -rf .uv_cache
 
 re: clean install
+
+env:
+	export HF_HOME=$(PWD)/.llm
+	export UV_CACHE_DIR=$(PWD)/.uv_cache
 
 test: sync
 	uv run python3.14 -m pytest tester/run_test.py
