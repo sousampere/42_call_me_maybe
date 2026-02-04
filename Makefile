@@ -68,6 +68,9 @@ lint: flake8 mypy
 
 lint-strict: flake8 mypy-strict
 
+source: sync
+	source .venv/bin/activate
+
 debug:
 	python -m pdb -m src --input $(DEFAULT_INPUT) --output $(DEFAULT_OUTPUT)
 
