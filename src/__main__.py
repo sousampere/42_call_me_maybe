@@ -83,7 +83,7 @@ def main() -> None:
     - Save everything in output file as json
     """
     # ? ===== Loading LLM ======
-    llm = Small_LLM_Model(device='mps')
+    llm = Small_LLM_Model()
 
     # ? ===== Parsing =====
     args = get_parsed_args()

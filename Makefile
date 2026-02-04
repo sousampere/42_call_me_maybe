@@ -10,15 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
-# I'm starting this new project and I'm not sure that I understood the project very well. Here is what I understood :
-# - I open the input json file (by default, it is data/input/function_calling_test.json)
-# - For each prompt in this json file, I send it to the LLM
-# - I ask the LLM to send back a json formatted output with the following entries : 
-#     - original prompt ("prompt")
-#     - function name to use to execute the prompt ("fn_name")
-#     - arguments to send to the function selected by the LLM
-# - While the LLM produces the tokens, I monitor it and apply constrained decoding to make sure that its output is respecting the json format, and that it is respecting the format of the function, defined in the function_definition.json.
-# - I repeat the process for every prompt in my input
+# export HF_HOME=
+# export UV_CACHE_DIR=
 
 
 # PROJECT CONFIGURATION
