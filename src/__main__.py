@@ -17,7 +17,11 @@ except Exception as e:
 
 
 def get_parsed_args() -> dict[str, str]:
-    """Initialize argparse settings and returns input and output args"""
+    """Get the arguments from the user's prompt
+
+    Returns:
+        dict[str, str]: Arguments (arg, value)
+    """
     parser = argparse.ArgumentParser(
         description="gtourdia's call_me_maybe project (from school 42). "
         "Usage : uv run python -m src [--input <input_file>] \
@@ -67,7 +71,17 @@ def get_parsed_args() -> dict[str, str]:
 
 
 def main() -> None:
-    """Process the prompts and create a json file containing the result"""
+    """Run the main process :
+    - Loading LLM
+
+    For each prompt in the provided input :
+    - Creating prompt to get the function
+    - Get the function
+    - Create the prompt to get the args
+    - Get the args
+
+    - Save everything in output file as json
+    """
     # ? ===== Loading LLM ======
     llm = Small_LLM_Model(device='mps')
 
@@ -114,7 +128,8 @@ def main() -> None:
 
         # ! ===== Generating arguments ======
         # ? ===== Getting function args ======
-        function_data = get_function_data(output)
+        function_data = get_function_data(output,
+                                          args['functions_definitions'])
         instructions = '''<|im_start|>system
 {"goal": "Select the arguments for the following function, \
 according to the user's prompt, followed by a \n character."},\
@@ -143,5 +158,7 @@ according to the user's prompt, followed by a \n character."},\
 if __name__ == "__main__":
     try:
         main()
+        exit(0)
     except Exception as e:
         printerr(f'Caught an error: {e}')
+        exit(1)

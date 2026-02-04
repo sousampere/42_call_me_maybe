@@ -13,7 +13,14 @@ except Exception as e:
 
 
 def get_available_functions() -> list[str]:
-    """Return a list of the available functions"""
+    """Return a list of the available functions
+
+    Raises:
+        Exception: No functions
+
+    Returns:
+        list[str]: available function (list)
+    """
     json_data = load_json('data/input/functions_definition.json')
     functions = list(map(lambda ft: ft['fn_name'], json_data))
     if len(functions) == 0:
@@ -21,15 +28,31 @@ def get_available_functions() -> list[str]:
     return functions
 
 
-def get_function_data(function_name: str) -> Any:
-    """Returns the data of a given function name (data picked in fixed path)"""
-    json_data = load_json('data/input/functions_definition.json')
+def get_function_data(function_name: str, path: str) -> Any:
+    """Returns the data of a given function name
+
+    Args:
+        function_name (str)
+        path (str): path to the functions_definition
+
+    Returns:
+        Any: function data
+    """
+    json_data = load_json(path)
     ft = list(filter(lambda ft: ft['fn_name'] == function_name, json_data))
     return ft[0]
 
 
 def generate_int(instructions: str, llm: Small_LLM_Model) -> int:
-    """ Generates an int from the given instrucitons """
+    """Generates an int from the given instrucitons
+
+    Args:
+        instructions (str): instructions prompt
+        llm (Small_LLM_Model): loaded llm
+
+    Returns:
+        int: int value
+    """
     output = ''
     # Encoding string data into logits
     encoded_text = llm._encode(instructions + output)
@@ -68,7 +91,15 @@ def generate_int(instructions: str, llm: Small_LLM_Model) -> int:
 
 
 def generate_float(instructions: str, llm: Small_LLM_Model) -> float:
-    """ Generates a float from the given instrucitons """
+    """Generates a float from the given instrucitons
+
+    Args:
+        instructions (str): instructions prompt
+        llm (Small_LLM_Model): loaded llm
+
+    Returns:
+        float: float value
+    """
     output = ''
     encoded_text = llm._encode(instructions + output)
     encoded_text = tensor_to_list(encoded_text)
@@ -112,6 +143,15 @@ def generate_float(instructions: str, llm: Small_LLM_Model) -> float:
 
 
 def generate_bool(instructions: str, llm: Small_LLM_Model) -> bool:
+    """Generates a bool from the given instrucitons
+
+    Args:
+        instructions (str): instructions prompt
+        llm (Small_LLM_Model): loaded llm
+
+    Returns:
+        bool value
+    """
     output = ''
     encoded_text = llm._encode(instructions + output)
     encoded_text = tensor_to_list(encoded_text)
@@ -144,6 +184,15 @@ def generate_bool(instructions: str, llm: Small_LLM_Model) -> bool:
 
 
 def generate_str(instructions: str, llm: Small_LLM_Model) -> str:
+    """Generates a str from the given instrucitons
+
+    Args:
+        instructions (str): instructions prompt
+        llm (Small_LLM_Model): loaded llm
+
+    Returns:
+        str value
+    """
     output = ''
     encoded_text = llm._encode(instructions + output)
     encoded_text = tensor_to_list(encoded_text)
@@ -176,7 +225,18 @@ def generate_function(available_functions: list[str],
                       prompt: str,
                       llm: Small_LLM_Model,
                       args: dict[str, str]) -> str:
-    """Generate a function from the given prompt using the llm"""
+    """Generate a function from the given prompt using the llm
+
+    Args:
+        available_functions (list[str]): list of functions
+        instructions (str): instruction prompt
+        prompt (str): user's prompt
+        llm (Small_LLM_Model): loaded llm
+        args (dict[str, str]): args of the program
+
+    Returns:
+        str: function string
+    """
     output = 'fn_'
     if args['verbose']:
         printblue('==================================================\n\n')
@@ -228,7 +288,18 @@ def generate_function(available_functions: list[str],
 
 def generate_args(args: dict[str, str], function_data: dict[str, Any],
                   instructions: str, llm: Small_LLM_Model) -> dict[str, Any]:
-    """Generate arguments for the given function using the llm"""
+    """Generate arguments for the given function using the llm
+
+    Args:
+        args (dict[str, str]): Program args
+        function_data (dict[str, Any]): function data obtained
+            from get_function_data
+        instructions (str): instructions prompt
+        llm (Small_LLM_Model): loaded llm
+
+    Returns:
+        dict[str, Any]: args for thr function
+    """
     if args['verbose']:
         print('')
         print(f'Args to get: {function_data['args_names']}')

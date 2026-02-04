@@ -38,7 +38,18 @@ def printyellow(*args: Any) -> None:
 
 
 def load_json(json_file_path: str) -> Any:
-    """Loads the given json file as a list object"""
+    """Loads the given json file as a list object
+
+    Args:
+        json_file_path (str): Json file to load
+
+    Raises:
+        FileNotFoundError: Not found
+        Exception: Any other exception
+
+    Returns:
+        Any: json data as a python list
+    """
     try:
         with open(json_file_path, 'r') as input_file:
             loaded_json = json.load(input_file)
