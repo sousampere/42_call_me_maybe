@@ -20,3 +20,7 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "src.llm_utils"
 ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "uvcache.*"
+ignore_errors = true
