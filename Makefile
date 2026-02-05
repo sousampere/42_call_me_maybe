@@ -88,8 +88,8 @@ clean:
 re: clean install
 
 env:
-	export HF_HOME=$(PWD)/.llm
-	export UV_CACHE_DIR=$(PWD)/.uv_cache
+	export HF_HOME=$(pwd)/.llm
+	export UV_CACHE_DIR=$(pwd)/.uv_cache
 
 test: sync
 	uv run python3.14 -m pytest tester/run_test.py
