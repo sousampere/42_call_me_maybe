@@ -54,7 +54,7 @@ def load_json(json_file_path: str) -> Any:
         with open(json_file_path, 'r') as input_file:
             loaded_json = json.load(input_file)
     except FileNotFoundError as e:
-        raise FileNotFoundError(f'Your input file was not found. {e}')
+        raise FileNotFoundError(f'The file was not found. {e}')
     except Exception as e:
         raise Exception(e)
     return loaded_json
