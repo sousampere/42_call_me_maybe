@@ -92,14 +92,14 @@ def main() -> None:
     try:
         prompts = load_json(args['input'])
     except Exception:
-        raise FileNotFoundError('Your prompt (input) file was not ' + 
+        raise FileNotFoundError('Your prompt (input) file was not ' +
                                 f'found ({args['input']})')
     # Final json will be the content saved in the output path
     final_json = []
     try:
         json_data_ft = load_json(args['functions_definitions'])
-    except Exception :
-        raise FileNotFoundError('Your functions_definitions file was not ' + 
+    except Exception:
+        raise FileNotFoundError('Your functions_definitions file was not ' +
                                 f'found ({args['functions_definitions']})')
     available_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
     if (args['verbose']):
