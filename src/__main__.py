@@ -30,14 +30,14 @@ def get_parsed_args() -> dict[str, str]:
     parser.add_argument(
         # Input arg
         "--input",
-        required=True,
+        required=False,
         help="input file path -> containing the prompts to convert",
         default='data/input/function_calling_tests.json'
     )
     parser.add_argument(
         # Output arg
         "--output",
-        required=True,
+        required=False,
         help="output file path -> to store llm's results",
         default='data/output/function_calling_result.json'
     )
