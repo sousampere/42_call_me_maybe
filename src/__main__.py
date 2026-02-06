@@ -91,16 +91,22 @@ def main() -> None:
     # ? ===== Opening input file ======
     try:
         prompts = load_json(args['input'])
-    except Exception:
+    except FileNotFoundError:
         raise FileNotFoundError('Your prompt (input) file was not ' +
                                 f'found ({args['input']})')
+    except Exception:
+        raise Exception(f'There was an error while loading \
+{args['input']}. Please provide a non-corrupted file.')
     # Final json will be the content saved in the output path
     final_json = []
     try:
         json_data_ft = load_json(args['functions_definitions'])
-    except Exception:
+    except FileNotFoundError:
         raise FileNotFoundError('Your functions_definitions file was not ' +
                                 f'found ({args['functions_definitions']})')
+    except Exception:
+        raise Exception(f'There was an error while loading \
+{args['functions_definitions']}. Please provide a non-corrupted file.')
     available_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
     if (args['verbose']):
         print('===== Verbose ON ======')
@@ -113,7 +119,10 @@ def main() -> None:
     for prompt in prompts:
         # ! ===== Generating function ======
         # ? ===== Prompt creation ======
-        user_prompt = prompt['prompt']
+        try:
+            user_prompt = prompt['prompt']
+        except Exception:
+            raise Exception('Corrupted json. Please check your json')
         instructions = '''<|im_start|>system
 {"available_functions": ''' + str(available_functions) + ''',\
 "goal": "Select the correct function to execute the user's prompt"}<|im_end|>

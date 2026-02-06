@@ -40,6 +40,13 @@ def get_function_data(function_name: str, path: str) -> Any:
     """
     json_data = load_json(path)
     ft = list(filter(lambda ft: ft['fn_name'] == function_name, json_data))
+    if 'args_names' not in ft[0] or 'args_types' not in ft[0]:
+        raise Exception('Invalid json: missing args_names or args_types\
+ (in functions_definitions)')
+    for arg in ft[0]['args_names']:
+        if arg not in ft[0]['args_types'].keys():
+            raise Exception(f'Invalid json: missing args_type\
+ (for {ft[0]['fn_name']} -> arg "{arg}")')
     return ft[0]
 
 
