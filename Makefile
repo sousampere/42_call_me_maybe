@@ -88,8 +88,8 @@ clean:
 re: clean install
 
 env:
-	export HF_HOME=$(pwd)/.llm
-	export UV_CACHE_DIR=$(pwd)/.uv_cache
+	@echo "EXECUTE IF NO SPACE LEFT -> export HF_HOME=(this directory)/.llm"
+	@echo "EXECUTE IF NO SPACE LEFT -> export UV_CACHE_DIR=(this directory)/.uv_cache"
 
 test: sync
 	uv run python3.14 -m pytest tester/run_test.py
