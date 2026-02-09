@@ -294,7 +294,8 @@ def generate_function(available_functions: list[str],
 
 
 def generate_args(args: dict[str, str], function_data: dict[str, Any],
-                  instructions: str, llm: Small_LLM_Model) -> dict[str, Any]:
+                  instructions: str,
+                  llm: Small_LLM_Model) -> Any:
     """Generate arguments for the given function using the llm
 
     Args:
