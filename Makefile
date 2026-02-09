@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 # export HF_HOME=/home/gtourdia/sgoinfre/42_call_me_maybe/.llm
-# export UV_CACHE_DIR=/home/gtourdia/sgoinfre/42_call_me_maybe.uv_cache
+# export UV_CACHE_DIR=/home/gtourdia/sgoinfre/42_call_me_maybe/.uv_cache
 
 
 # PROJECT CONFIGURATION
