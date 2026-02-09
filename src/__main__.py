@@ -139,7 +139,7 @@ def main() -> None:
         output = generate_function(available_functions,
                                    instructions, prompt, llm, args)
         llm_result['fn_name'] = output
-        llm_result['args'] = {}
+        # llm_result['args'] = {}
         if args['verbose']:
             printgreen(f'✅ Function found: {output}')
 

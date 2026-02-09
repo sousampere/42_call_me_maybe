@@ -312,7 +312,7 @@ def generate_args(args: dict[str, str], function_data: dict[str, Any],
         print(f'Args to get: {function_data['args_names']}')
 
     # Initializing the dict containing the args to return
-    llm_args: dict[str, Any] = {'args': {}}
+    llm_args: dict[str, Any] = {'fn_args': {}}
 
     for arg in function_data['args_names']:
         if args['verbose']:
@@ -323,25 +323,25 @@ def generate_args(args: dict[str, str], function_data: dict[str, Any],
         if function_data['args_types'][arg] == 'int':
             # ? > For integers
             value_int = generate_int(instructions, llm)
-            llm_args['args'][arg] = value_int
+            llm_args['fn_args'][arg] = value_int
             instructions += str(value_int) + '\n'
         if function_data['args_types'][arg] == 'float':
             # ? > For floats
             value_float = generate_float(instructions, llm)
-            llm_args['args'][arg] = value_float
+            llm_args['fn_args'][arg] = value_float
             instructions += str(value_float) + '\n'
         if function_data['args_types'][arg] == 'bool':
             # ? > For bools
             value_bool = generate_bool(instructions, llm)
-            llm_args['args'][arg] = value_bool
+            llm_args['fn_args'][arg] = value_bool
             instructions += str(value_bool) + '\n'
         if function_data['args_types'][arg] == 'str':
             # ? > For strings
             value = generate_str(instructions, llm)
             value = value.replace('Ġ', ' ').replace('Ċ', '')
-            llm_args['args'][arg] = value
+            llm_args['fn_args'][arg] = value
             instructions += str(value) + '\n'
         if args['verbose']:
             printgreen(f'🎯 Found arg {arg} -> '
-                       f'{llm_args['args'][arg]}')
-    return llm_args
+                       f'{llm_args['fn_args'][arg]}')
+    return llm_args['fn_args']
