@@ -10,6 +10,7 @@ try:
         generate_function, generate_args
     import json
     import os
+    from .prompts import get_function_instructions, get_args_instructions
 except Exception as e:
     print(f"Could not import a module: {e}")
     print('Have you tried installing the env with "make install"?')
@@ -95,18 +96,19 @@ def main() -> None:
         raise FileNotFoundError('Your prompt (input) file was not ' +
                                 f'found ({args['input']})')
     except Exception:
-        raise Exception(f'There was an error while loading \
-{args['input']}. Please provide a non-corrupted file.')
-    # Final json will be the content saved in the output path
+        raise Exception(f'There was an error while loading '
+                        f'{args['input']}. Please provide'
+                        ' a non-corrupted file.')
     final_json = []
     try:
         json_data_ft = load_json(args['functions_definitions'])
     except FileNotFoundError:
-        raise FileNotFoundError('Your functions_definitions file was not ' +
+        raise FileNotFoundError('Your functions_definitions file was not '
                                 f'found ({args['functions_definitions']})')
     except Exception:
-        raise Exception(f'There was an error while loading \
-{args['functions_definitions']}. Please provide a non-corrupted file.')
+        raise Exception(f'There was an error while loading '
+                        f'{args['functions_definitions']}. '
+                        'Please provide a non-corrupted file.')
     available_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
     if (args['verbose']):
         print('===== Verbose ON ======')
@@ -123,13 +125,8 @@ def main() -> None:
             user_prompt = prompt['prompt']
         except Exception:
             raise Exception('Corrupted json. Please check your json')
-        instructions = '''<|im_start|>system
-{"available_functions": ''' + str(available_functions) + ''',\
-"goal": "Select the correct function to execute the user's prompt"}<|im_end|>
-<|im_start|>user
-''' + user_prompt + '''<|im_end|>
-<|im_start|>assistant
-'''
+        instructions = get_function_instructions(available_functions, user_prompt)
+        
         # ? ===== Preparing result =====
         llm_result = {
             'prompt': user_prompt
@@ -147,16 +144,7 @@ def main() -> None:
         # ? ===== Getting function args ======
         function_data = get_function_data(output,
                                           args['functions_definitions'])
-        instructions = '''<|im_start|>system
-{"goal": "Select the arguments for the following function, \
-according to the user's prompt, followed by a \n character."},\
-''' + str(function_data) + '''
-{"particularity": "For negative numbers, include\
- a - character at the start"}<|im_end|>
-<|im_start|>user
-''' + user_prompt + '''<|im_end|>
-<|im_start|>assistant
-'''
+        instructions = get_args_instructions(function_data, user_prompt)
         llm_result['args'] = generate_args(args, function_data,
                                            instructions, llm)
         final_json.append(llm_result)
