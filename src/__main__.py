@@ -4,7 +4,7 @@
 try:
     import argparse
     from src.misc import printerr, load_json, \
-        printgreen, printyellow
+        printgreen
     from llm_sdk import Small_LLM_Model
     from .validation import get_function_data, \
         generate_function, generate_args
@@ -87,9 +87,7 @@ def main() -> None:
     # List containing the generated data (will be exported as json)
     final_json = []
 
-
-    args = get_parsed_args() # Loading args
-
+    args = get_parsed_args()  # Loading args
 
     # Loading json input (prompts)
     try:
@@ -104,11 +102,11 @@ def main() -> None:
                         f'{args['input']}. Please provide'
                         ' a non-corrupted file.')
 
-
     # Loading json containing function definitions
     try:
-        available_functions = list(map(lambda ft: ft['fn_name'],
-                                       load_json(args['functions_definitions'])))
+        available_functions = list(
+            map(lambda ft: ft['fn_name'],
+                load_json(args['functions_definitions'])))
         if (args['verbose']):
             print(f'{Colors.GREEN}✅ Loaded function definitions{Colors.END}')
     except FileNotFoundError:
@@ -119,7 +117,6 @@ def main() -> None:
                         f'{args['functions_definitions']}. '
                         'Please provide a non-corrupted file.')
 
-
     # Printing status if --verbose is activated
     if (args['verbose']):
         print(f'\n{Colors.YELLOW}===== Verbose ON ======')
@@ -128,13 +125,10 @@ def main() -> None:
         print(f'Output path: {args['output']}')
         print(f'{Colors.END}')
 
-
-    llm = Small_LLM_Model() # Loading LLM
-
+    llm = Small_LLM_Model()  # Loading LLM
 
     if (args['verbose']):
         print(f'{Colors.BOLD}=== 💭​ PROCESSING START ==={Colors.END}')
-
 
     # Start processing all prompts
     for prompt in prompts:
@@ -143,17 +137,17 @@ def main() -> None:
         try:
             user_prompt = prompt['prompt']
             if (args['verbose']):
-                print(f'\n\n\n=== 💭​ Processing prompt "{user_prompt}"==={Colors.END}')
+                print('\n\n\n=== 💭​ Processing prompt '
+                      f'"{user_prompt}"==={Colors.END}')
         except Exception:
             raise Exception('Corrupted json. Please check your json')
-        instructions = get_function_instructions(available_functions, user_prompt)
-
+        instructions = get_function_instructions(available_functions,
+                                                 user_prompt)
 
         # Creating the base of the output for the current prompt
         llm_result = {
             'prompt': user_prompt
         }
-
 
         # Generating the function using constained decoding
         output = generate_function(available_functions,
@@ -165,20 +159,15 @@ def main() -> None:
         function_data = get_function_data(output,
                                           args['functions_definitions'])
 
-
         # Generating the arguments for the function found
         instructions = get_args_instructions(function_data, user_prompt)
         llm_result['args'] = generate_args(args, function_data,
                                            instructions, llm)
-        # if args['verbose']:
-        #     print(f'{Colors.LIGHT_GRAY}✅ Args found: {llm_result['args']}\033[K', end='\r')
-
 
         # Appends the prompt's output to the
         # list that will be exported as json
         final_json.append(llm_result)
         # Printing status if --verbose is activated
-
 
     # Save the output in the chosen destination file
     try:

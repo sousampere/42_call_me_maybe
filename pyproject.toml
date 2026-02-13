@@ -5,6 +5,7 @@ description = "gtourdia's call_me_maybe project (school 42)"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "fire>=0.7.1",
     "flake8>=7.3.0",
     "mypy>=1.19.1",
     "numpy>=2.4.1",
