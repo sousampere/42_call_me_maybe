@@ -8,6 +8,7 @@ try:
     from .llm_utils import tensor_to_list, \
         get_highest_str_token_from_logits, \
         set_null_highest_token
+    from .constants import Colors
 except Exception as e:
     print(f"Could not import something: {e}")
 
@@ -245,9 +246,8 @@ def generate_function(available_functions: list[str],
         str: function string
     """
     output = 'fn_'
-    if args['verbose']:
-        printblue('==================================================\n\n')
-        printblue(f'Prompt => {instructions + output}')
+    # if args['verbose']:
+    #     printblue(f'Prompt => {instructions + output}')
     # ? ===== Tokenization ======
     # Encoding the tokens
     encoded_text = llm._encode(instructions + output)
@@ -259,7 +259,7 @@ def generate_function(available_functions: list[str],
 
     # ? ===== Generate valid token, one by one ======
     if args['verbose']:
-        print(f'Calculating function for prompt: {prompt}')
+        print(f'{Colors.LIGHT_GRAY}Calculating function for prompt: {prompt['prompt']}...', end='\r')
     while (output not in available_functions):
         ft_list = []
         for function in available_functions:
@@ -273,6 +273,7 @@ def generate_function(available_functions: list[str],
             current_token = get_highest_str_token_from_logits(
                 logits,
                 wordlist)
+            print(f'{Colors.LIGHT_GRAY}Calculating function for prompt: {prompt['prompt']}... fn_{current_token}\033[K', end='\r')
             valid_token = False
             for function in available_functions:
                 if function.startswith(output + current_token):
@@ -309,16 +310,15 @@ def generate_args(args: dict[str, str], function_data: dict[str, Any],
         dict[str, Any]: args for thr function
     """
     if args['verbose']:
-        print('')
-        print(f'Args to get: {function_data['args_names']}')
+        print(f'📝​ Getting the following args : {function_data['args_names']}')
+
 
     # Initializing the dict containing the args to return
     llm_args: dict[str, Any] = {'fn_args': {}}
 
     for arg in function_data['args_names']:
         if args['verbose']:
-            print('')
-            printyellow(f'Getting arg "{arg}"...')
+            print(f'{Colors.LIGHT_GRAY}Calculating arg: {arg}...', end='\r')
         instructions = instructions + f'{arg}='
         # Dispatch the generation to the correct generator
         if function_data['args_types'][arg] == 'int':
@@ -344,5 +344,5 @@ def generate_args(args: dict[str, str], function_data: dict[str, Any],
             instructions += str(value) + '\n'
         if args['verbose']:
             printgreen(f'🎯 Found arg {arg} -> '
-                       f'{llm_args['fn_args'][arg]}')
+                       f'{llm_args['fn_args'][arg]}\033[K')
     return llm_args['fn_args']

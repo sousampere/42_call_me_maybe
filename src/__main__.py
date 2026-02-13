@@ -11,6 +11,7 @@ try:
     import json
     import os
     from .prompts import get_function_instructions, get_args_instructions
+    from .constants import Colors
 except Exception as e:
     print(f"Could not import a module: {e}")
     print('Have you tried installing the env with "make install"?')
@@ -83,15 +84,18 @@ def main() -> None:
 
     - Save everything in output file as json
     """
-    # ? ===== Loading LLM ======
-    llm = Small_LLM_Model()
+    # List containing the generated data (will be exported as json)
+    final_json = []
 
-    # ? ===== Parsing =====
-    args = get_parsed_args()
 
-    # ? ===== Opening input file ======
+    args = get_parsed_args() # Loading args
+
+
+    # Loading json input (prompts)
     try:
         prompts = load_json(args['input'])
+        if (args['verbose']):
+            print(f'{Colors.GREEN}✅ Loaded input file (prompts){Colors.END}')
     except FileNotFoundError:
         raise FileNotFoundError('Your prompt (input) file was not ' +
                                 f'found ({args['input']})')
@@ -99,9 +103,14 @@ def main() -> None:
         raise Exception(f'There was an error while loading '
                         f'{args['input']}. Please provide'
                         ' a non-corrupted file.')
-    final_json = []
+
+
+    # Loading json containing function definitions
     try:
-        json_data_ft = load_json(args['functions_definitions'])
+        available_functions = list(map(lambda ft: ft['fn_name'],
+                                       load_json(args['functions_definitions'])))
+        if (args['verbose']):
+            print(f'{Colors.GREEN}✅ Loaded function definitions{Colors.END}')
     except FileNotFoundError:
         raise FileNotFoundError('Your functions_definitions file was not '
                                 f'found ({args['functions_definitions']})')
@@ -109,48 +118,69 @@ def main() -> None:
         raise Exception(f'There was an error while loading '
                         f'{args['functions_definitions']}. '
                         'Please provide a non-corrupted file.')
-    available_functions = list(map(lambda ft: ft['fn_name'], json_data_ft))
+
+
+    # Printing status if --verbose is activated
     if (args['verbose']):
-        print('===== Verbose ON ======')
+        print(f'\n{Colors.YELLOW}===== Verbose ON ======')
         print(f'Available functions: {available_functions}')
         print(f'Input path: {args['input']}')
         print(f'Output path: {args['output']}')
-        print('')
+        print(f'{Colors.END}')
 
-    # ! ===== Processing start ======
+
+    llm = Small_LLM_Model() # Loading LLM
+
+
+    if (args['verbose']):
+        print(f'{Colors.BOLD}=== 💭​ PROCESSING START ==={Colors.END}')
+
+
+    # Start processing all prompts
     for prompt in prompts:
-        # ! ===== Generating function ======
-        # ? ===== Prompt creation ======
+
+        # Generating instructions for the LLM to process
         try:
             user_prompt = prompt['prompt']
+            if (args['verbose']):
+                print(f'\n\n\n=== 💭​ Processing prompt "{user_prompt}"==={Colors.END}')
         except Exception:
             raise Exception('Corrupted json. Please check your json')
         instructions = get_function_instructions(available_functions, user_prompt)
-        
-        # ? ===== Preparing result =====
+
+
+        # Creating the base of the output for the current prompt
         llm_result = {
             'prompt': user_prompt
         }
 
-        # ? ===== Generate function =====
+
+        # Generating the function using constained decoding
         output = generate_function(available_functions,
                                    instructions, prompt, llm, args)
         llm_result['fn_name'] = output
-        # llm_result['args'] = {}
+        # Printing status if --verbose is activated
         if args['verbose']:
-            printgreen(f'✅ Function found: {output}')
-
-        # ! ===== Generating arguments ======
-        # ? ===== Getting function args ======
+            printgreen(f'✅ Function found: {output}\033[K')
         function_data = get_function_data(output,
                                           args['functions_definitions'])
+
+
+        # Generating the arguments for the function found
         instructions = get_args_instructions(function_data, user_prompt)
         llm_result['args'] = generate_args(args, function_data,
                                            instructions, llm)
-        final_json.append(llm_result)
-        if args['verbose']:
-            printyellow(f'Json for this prompt:\n{llm_result}')
+        # if args['verbose']:
+        #     print(f'{Colors.LIGHT_GRAY}✅ Args found: {llm_result['args']}\033[K', end='\r')
 
+
+        # Appends the prompt's output to the
+        # list that will be exported as json
+        final_json.append(llm_result)
+        # Printing status if --verbose is activated
+
+
+    # Save the output in the chosen destination file
     try:
         os.makedirs(os.path.dirname(args['output']))
     except Exception:
