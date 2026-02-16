@@ -12,9 +12,9 @@ Given a certaing JSON file containing prompts and another file containing functi
   },
   ...
 ]
-
-AND
-
+```
+and
+```
 [
   {
     "fn_name": "fn_add_numbers",
@@ -44,6 +44,7 @@ We are expected to output a JSON file containing for each prompt its original pr
 ]
 ```
 This output file needs to be 100% valid JSON. Since we are working on a very small LLM, its output doesn't absolutely have to be valid, as long as it is mostly choosing the good functions. To get better results, we would have to use a better model.
+To make the LLM output an available function every time, we are expected to use *constained decoding*, which is the concept of selecting the highest probability token generated, checking if it matches our expectations (a function name, arg type, etc.) and add its decoded value to our current text output.
 
 # Given instructions
 
@@ -63,79 +64,29 @@ The project uses uv for dependency management and a Makefile to automate core ta
 
 -  `make clean`: Remove temporary files and caches, such as `__pycache__` and `mypy_cache`.
 
-**[ EXECUTION ]**
-
-
-
-**[ ERRORS ]**
-
-
 
 # Resources
 
+- My knowledge since I've worked with LLM's before
+- [Qwenn control tokens & chat template](https://qwen.readthedocs.io/en/latest/getting_started/concepts.html)
+- Google Gemini was used for questions related to understanding constained decoding
 
+# Algorithms explanation
 
-# Algorithms choices
+The algorithm is quite simple:
+A parsing is done on the JSON inputs using the built-in python module `json`. With this, we created a base prompt containing the functions list using a JSON format since LLMs work well with JSON understanding. Constained decoding was first applied to the function generation to generate the function name, then the args of this function were generated one-by-one using many specialized functions (one function for all data types of arg: bool, str, float and int).
+The script then saves the result for each prompt in a list, that is outputted in the JSON output file, using `json.dump`.
 
+# Performace analysis
 
+Since this project uses Qwenn, I managed to reach very good result for simple function (that expect int/floats in input), but the nature of the LLM makes it unpredictable in generating good output for strings generation. The output quality depends on the difficulty of understanding the function.
+For instance, the LLM will easily find the arguments for `"What is the sum of 1 and 3?"`, but will struggle a lot on questions like `"Replace every 'i' in 'I want an icecream' with the name of the current president of France"`.
+This could have beed supervised if we had predictable function in input, but since the evaluator can make up any function he want, we cannot easily solve this problem, unless we use another more powerful LLM.
 
-**[ SIMPLE ]**
+# Challenges faced
+# Testing strategy
+# Example usage
 
-For simple complexity, we choosed a rather easy "minimum extraction method".
-
-- The algorithm processes the whole stack "a", looking for the smallest integer, and pushes it in stack
-		"b".
-
--  It then searches for the next smallest integer in what's remaining in stack "a", rotating or reverse rotating depending on what is the most efficient method to get to it in a minimal number of rotations.
-
--  It pushes it to "b" so it's placed above the previous one.
-
--  Once stack "a" is empty, all integers are sorted in "b" in descending order.
-
--  The algorithm then pushes back all "b" in "a", one interger at a time.
-
--  Result : "a" is correctly sorted in ascending order, from top to bottom, and "b" is empty.
-
-We chose this solution because, after trying multiple other sorting methods like bubble sort and insertion sort, it appeared it was the most efficient and optimizable one to reach the subjects requirements, even if it requires a lot of utility functions. This algorithm was made by lbonnet.
-
-**[ MEDIUM ]**
-
-The chosen medium algorithm is the chunk sort algorithm.
-
-How it works :
-
--  We create √n (times 1.72 to get a better result) chunks of numbers (n being the number of integers in the stack).
-
--  Each number being in the range of the first √n numbers is sent to the stack "b".
-
--  We repeat this step for each chunk, one by one.
-
--  At the end, the integers are all sent back to the stack "a", and then sorted using a stable algorithm (the simple one).
-
-We chose it because it was the easier to implement when being restricted by the push_swap moves.
-The algorithm was build by lbonnet and gtourdia simultaneously, until gtourdia managed to succeed in its implementation first.
-
-**[ COMPLEX ]**
-
-The chosen complex algorithm (with a complexity of O(n log n)) is the binary radix sort.
-
-How it works :
-
--  The Radix LSB sort (Least significant bit) is checking the least significant bit of a number.
-
--  If the bit is 0, it pushes the number to the stack "b", else it keeps it in "a" and check the next number until the whole stack "a" is analysed.
-
--  All numbers in the stack "b" are then sent back to the original stack "a"
-
--  The algorithm then checks the next least significant bit and does the same
-
--  We repeat these steps until the whole stack is sorted.
-
--  To make this even faster, we don't check the actual value, but rather the rank of this value in the sorted stack (example : if the stack is 1664, 42, 1337, 5, the ranks are 4, 2, 3, 1).
-
-We chose this algorithm due to its interesting sorting strategy, and because it was aligned with the project's requirements. This algorithm was made by gtourdia.
-
-# Bonus
 
 **[ OVERVIEW ]**
 
