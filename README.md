@@ -84,33 +84,25 @@ For instance, the LLM will easily find the arguments for `"What is the sum of 1 
 This could have beed supervised if we had predictable function in input, but since the evaluator can make up any function he want, we cannot easily solve this problem, unless we use another more powerful LLM.
 
 # Challenges faced
+
+The most difficult challenge for me was to think about how I could implement the constained decoding. I ended up checking if any of my available function starts with the generated token. If it does, I add this token to my output and regenerate the logits based on the previous prompt + the generated token. Else, I make the token's value to negative infinity, and check the next one highest token.
+
 # Testing strategy
-# Example usage
 
+I tested my program with the provided JSON files. Most of the functions are correct, but some arguments are hard to get right (depending on the LLM's quality). The output is still 100% valid JSON.
 
-**[ OVERVIEW ]**
+# Example usage in companies
 
-You can compile the bonus part using "make bonus". It generates a checker that behaves like the one given in the subject.
+This program could be integrated in a company's workflow in the case of users entering data in an unpredictable format, that needs to be processed in some ways. For example, I could set up a chatbot in the website of my server-hosting company, that execute the prompts of the user by using the functions that are available, like ```"Open my port 8080"``` -> ```function open_port will be used with arg a (int) = 8080```.
 
-Give numbers as parameters to the checker, and send instructions to it using the standard input.
+## Author
 
-Example : `./push_swap 5 6 8 9 4 | ./checker 5 6 8 9 4`.
-
-**[ RETURN VALUES ]**
-
-- **OK** if the stack A is successfully sorted and the stack B is empty
-- **KO** if the stack A is not sorted, or if the stack B is not empty
-- **Error** if an invalid argument is given (as a parameter, or from the standard input)
-
-## Authors
-
-- [@sousampere](https://github.com/sousampere) - 42 login : **gtourdia** -> _parsing, bench, complex & medium algorithms, push & reverse_rotate moves_
-- [@kletsol](https://github.com/kletsol) - 42 login : **lbonnet** -> _makefile, readme, swap & rotate moves, simple and medium algorithm._
-- The rest of the work was done by the two of us.
+- [@sousampere](https://github.com/sousampere) - 42 login : **gtourdia**
 
 
 ## 🚀 About Me
 I am a student at the 42 Mulhouse school. Most of my public projects will be from this school, while I will keep private most of my other projects.
+
 ## Contact me !
 
  - [LinkedIn](https://fr.linkedin.com/in/gaspardtourdiat)
