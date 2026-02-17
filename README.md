@@ -5,7 +5,7 @@
 Call_Me_Maybe is a project part of the 42 curriculum that aims to learn to generate content using text-based generative AI, also known as LLM (Large Language Model).
 
 Given a certaing JSON file containing prompts and another file containing function definitions :
-```
+```json
 [
   {
     "prompt": "What is the square root of 16?"
@@ -14,7 +14,7 @@ Given a certaing JSON file containing prompts and another file containing functi
 ]
 ```
 and
-```
+```json
 [
   {
     "fn_name": "fn_add_numbers",
@@ -33,7 +33,7 @@ and
 ```
 
 We are expected to output a JSON file containing for each prompt its original prompt, the function choosen by the LLM to resolve the prompt, and the arguments given for this function :
-```
+```json
 [
   {
   "prompt": "What is the sum of 2 and 3?",
