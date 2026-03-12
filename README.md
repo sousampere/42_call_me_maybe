@@ -1,3 +1,5 @@
+# THIS PROJECT IS ARCHIVED AND BASED ON AN OLD VERSION 1.0 OF THE SUBJECT. I DID A SECOND TIME THE PROJECT FOR THE SUBJECT VERSION 1.2, WHICH IS A WAY CLEANER CODE. FIND IT HERE : 
+[42_call_me_maybe_v1.2](https://github.com/sousampere/42_call_me_maybe_v1.2)
 *This project has been created as part of the 42 curriculum by gtourdia.*
 
 # Description
